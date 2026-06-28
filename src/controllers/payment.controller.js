@@ -7,34 +7,37 @@ import { successResponse, errorResponse } from '../utils/apiResponse.js';
 // ✅ Create Payment Intent
 export const createPaymentIntent = async (req, res) => {
   try {
+    console.log('🔍 createPaymentIntent called');
+    console.log('🔍 stripe object:', stripe ? '✅ Not null' : '❌ NULL');
+
+    if (!stripe) {
+      console.error('❌ Stripe is null!');
+      return errorResponse(res, 'Stripe is not configured. Please check STRIPE_SECRET_KEY in .env', 500);
+    }
+
     const { amount, recipeId, paymentType } = req.body;
     const userId = req.user.id;
     const userEmail = req.user.email;
 
-    // Validate payment type
-    if (!['recipe_purchase', 'premium_membership'].includes(paymentType)) {
-      return errorResponse(res, 'Invalid payment type', 400);
-    }
+    // ✅ Convert userId to String for metadata
+    const userIdString = userId.toString();
+    const recipeIdString = recipeId ? recipeId.toString() : '';
 
-    // For recipe purchase, verify recipe exists
-    if (paymentType === 'recipe_purchase') {
-      const recipe = await Recipe.findById(recipeId);
-      if (!recipe) {
-        return errorResponse(res, 'Recipe not found', 404);
-      }
-    }
+    console.log('🔍 Creating payment intent for:', { amount, paymentType, userId: userIdString });
 
     // Create payment intent
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount * 100, // Convert to cents
       currency: 'usd',
       metadata: {
-        userId,
-        userEmail,
-        recipeId: recipeId || '',
-        paymentType,
+        userId: userIdString,        // ✅ Must be String
+        userEmail: userEmail,         // ✅ Already String
+        recipeId: recipeIdString,     // ✅ Must be String
+        paymentType: paymentType,     // ✅ Already String
       },
     });
+
+    console.log('✅ Payment intent created:', paymentIntent.id);
 
     // Save payment record
     const payment = new Payment({
@@ -54,6 +57,8 @@ export const createPaymentIntent = async (req, res) => {
       paymentId: payment._id,
     });
   } catch (error) {
+    console.error('❌ createPaymentIntent error:', error.message);
+    console.error('❌ Error stack:', error.stack);
     return errorResponse(res, error.message, 500);
   }
 };
@@ -64,12 +69,15 @@ export const confirmPayment = async (req, res) => {
     const { paymentIntentId } = req.body;
     const userId = req.user.id;
 
+    if (!stripe) {
+      return errorResponse(res, 'Stripe is not configured', 500);
+    }
+
     const payment = await Payment.findOne({ transactionId: paymentIntentId });
     if (!payment) {
       return errorResponse(res, 'Payment not found', 404);
     }
 
-    // Verify payment with Stripe
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.status === 'succeeded') {
@@ -77,7 +85,6 @@ export const confirmPayment = async (req, res) => {
       payment.paidAt = new Date();
       await payment.save();
 
-      // Update user premium status if premium membership
       if (payment.paymentType === 'premium_membership') {
         await User.findByIdAndUpdate(userId, { isPremium: true });
       }
@@ -89,6 +96,7 @@ export const confirmPayment = async (req, res) => {
       return errorResponse(res, 'Payment not completed', 400);
     }
   } catch (error) {
+    console.error('❌ confirmPayment error:', error.message);
     return errorResponse(res, error.message, 500);
   }
 };
@@ -159,8 +167,12 @@ export const getPaymentStats = async (req, res) => {
   }
 };
 
-// ✅ Stripe Webhook (Handle webhook events)
+// ✅ Stripe Webhook
 export const handleWebhook = async (req, res) => {
+  if (!stripe) {
+    return res.status(500).json({ error: 'Stripe not configured' });
+  }
+
   const sig = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -172,7 +184,6 @@ export const handleWebhook = async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntent = event.data.object;
@@ -198,7 +209,6 @@ const handlePaymentSuccess = async (paymentIntent) => {
       payment.paidAt = new Date();
       await payment.save();
 
-      // Update user premium status if premium membership
       if (payment.paymentType === 'premium_membership') {
         await User.findByIdAndUpdate(payment.userId, { isPremium: true });
       }

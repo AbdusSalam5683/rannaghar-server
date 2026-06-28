@@ -1,9 +1,10 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { apiLimiter } from './middlewares/rateLimiter.js';
 
 // Import routes
@@ -16,7 +17,19 @@ import paymentRoutes from './routes/payment.routes.js';
 
 import connectDB from './config/db.js';
 
-dotenv.config();
+// ✅ Get current directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Load .env from root directory
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
+// ✅ Debug: Check if .env is loading
+console.log('🔍 Current directory:', __dirname);
+console.log('🔍 .env path:', path.join(__dirname, '../.env'));
+console.log('🔍 STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? '✅ SET' : '❌ NOT SET');
+console.log('🔍 MONGODB_URI:', process.env.MONGODB_URI ? '✅ SET' : '❌ NOT SET');
+console.log('🔍 JWT_SECRET:', process.env.JWT_SECRET ? '✅ SET' : '❌ NOT SET');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +39,10 @@ connectDB();
 
 // ✅ Middleware
 app.use(helmet());
+
+// Webhook route must be before express.json()
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL || 'http://localhost:3000',
@@ -34,6 +51,7 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 app.use('/api', apiLimiter);
