@@ -1,0 +1,234 @@
+# ========================================
+#  Node.js Dependencies
+# ========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ========================================
+#  Environment Variables (CRITICAL!)
+# ========================================
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+.env.test
+.env.*.local
+!.env.example
+
+# ========================================
+#  Build & Distribution
+# ========================================
+dist/
+build/
+out/
+*.tar.gz
+*.zip
+*.rar
+
+# ========================================
+#  Uploads / Media Files (User Uploaded)
+# ========================================
+uploads/
+temp/
+tmp/
+public/uploads/
+media/
+images/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.mp4
+*.mov
+*.avi
+*.pdf
+*.doc
+*.docx
+
+# ========================================
+#  Database Files
+# ========================================
+*.db
+*.sqlite
+*.sqlite3
+*.mongodb
+*.dump
+*.backup
+/data/
+/db-data/
+
+# ========================================
+#  Logs
+# ========================================
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+access.log
+error.log
+combined.log
+pm2-*.log
+pm2.log
+
+# ========================================
+#  OS Files
+# ========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+*.tmp
+*.temp
+
+# ========================================
+#  IDE / Editor
+# ========================================
+# VS Code
+.vscode/
+*.code-workspace
+.vscode-test/
+
+# IntelliJ / WebStorm
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+*.un~
+
+# Emacs
+*#
+\#*
+.#*
+
+# ========================================
+#  Testing & Coverage
+# ========================================
+coverage/
+.nyc_output/
+.jest-cache/
+.jest_cache/
+test-results/
+*.test.js
+*.spec.js
+*.test.ts
+*.spec.ts
+__tests__/
+
+# ========================================
+#  Security / Secrets
+# ========================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.csr
+secrets.json
+secrets.yml
+secret.key
+private.key
+public.key
+jwt.key
+*.p8
+service-account.json
+*.firebase.json
+
+# ========================================
+#  Cache / Temporary Files
+# ========================================
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.swc/
+.eslintcache
+.prettiercache
+.typescript-cache
+*.tsbuildinfo
+
+# ========================================
+#  Docker & Container
+# ========================================
+*.pid
+*.container
+*.image
+docker-compose.override.yml
+Dockerfile.dev
+.dockerignore
+.docker/
+Dockerfile.local
+
+# ========================================
+#  PM2 / Process Manager
+# ========================================
+.pm2/
+.forever/
+ecosystem.config.js
+ecosystem.config.local.js
+pm2.json
+
+# ========================================
+#  Stripe / Payment Testing
+# ========================================
+stripe-webhook-secret.txt
+*.stripe.log
+webhook-test-data.json
+
+# ========================================
+#  API Documentation (if auto-generated)
+# ========================================
+apidoc/
+swagger-output.json
+openapi.json
+postman-collection.json
+
+# ========================================
+#  Project Specific (RannaGhar)
+# ========================================
+# User uploaded recipe images
+recipe-images/
+profile-pictures/
+recipe-thumbnails/
+*.recipe-backup
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.swp
+*~
+
+# Session files
+session.lock
+cookies.json
+session-store/
+
+# Local development
+.env.local
+config/local.js
+config/development.js
+src/secrets.local.js
